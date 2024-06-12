@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    stages {
+        stage('Importar Repositorio') {
+            steps {
+            	git 'https://github.com/tfg2asircanaveral2024/6-proyecto-powershell-base-prueba.git'
+            }
+        }
+        
+        stage('Dependencias(PSDepend') {
+            steps {
+                // Ejecutar tareas de build con invoke-build
+                pwsh 'Invoke-PSDepend -Path ./Dependencias -Force -Erroraction Stop'
+            }
+        }
+        
+        stage('Tests (Pester)') {
+            steps {
+            	pwsh 'Invoke-Pester'
+            }
+        }
+        
+        stage('Test (PSScriptAnalyzer)') {
+            steps {
+            	pshw './Gestionar-Datos.ScriptAnalyzer.ps1'
+            }
+        }
+        stage('Despliegue a la rama producción de Github'){
+        	steps {
+        		sh 'chmod u+x script-despliegue-git.sh'
+        		sh './script-despliegue-git.sh'
+        	}
+        }
+        
+    }
+}
